@@ -480,7 +480,7 @@ function App() {
             <div className={styles.detailsGrid}>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>
-                  Guitar Model
+                  Guitar Name
                 </span>
 
                 <span className={styles.detailValue}>
