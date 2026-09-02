@@ -188,7 +188,7 @@ function App() {
                 name="itemName"
                 value={formData.itemName}
                 onChange={handleChange}
-                placeholder="e.g. Fender Stratocaster"
+                placeholder="Enter Guitar Name"
                 className={
                   errors.itemName
                     ? styles.inputError
@@ -258,7 +258,7 @@ function App() {
                 name="genre"
                 value={formData.genre}
                 onChange={handleChange}
-                placeholder="e.g. Rock"
+                placeholder="Enter Genre"
                 className={
                   errors.genre
                     ? styles.inputError
@@ -303,7 +303,7 @@ function App() {
 
             <div className={styles.formGroup}>
               <label htmlFor="company">
-                Manufacturer / Company Name
+                Manufacturer
               </label>
 
               <input
@@ -312,7 +312,7 @@ function App() {
                 name="company"
                 value={formData.company}
                 onChange={handleChange}
-                placeholder="e.g. Fender Musical Instruments"
+                placeholder="Enter Brand Name"
                 className={
                   errors.company
                     ? styles.inputError
@@ -444,7 +444,6 @@ function App() {
                 </table>
               </div>
 
-              {/* Pagination */}
               <div className={styles.pagination}>
                 <button
                   onClick={() => table.previousPage()}
