@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -19,6 +19,16 @@ function App() {
 
   const [errors, setErrors] = useState({});
   const [guitars, setGuitars] = useState([]);
+
+  const [selectedGuitar, setSelectedGuitar] = useState(null);
+  const [activeGuitar, setActiveGuitar] = useState(null);
+  const [showMerchantOnly, setShowMerchantOnly] = useState(false);
+
+  useEffect(() => {
+    if (selectedGuitar) {
+      setActiveGuitar(selectedGuitar);
+    }
+  }, [selectedGuitar]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -101,6 +111,10 @@ function App() {
     setErrors({});
   };
 
+  const filteredGuitars = showMerchantOnly
+    ? guitars.filter((guitar) => guitar.role === "Merchant")
+    : guitars;
+
   const columns = [
     {
       accessorKey: "itemName",
@@ -129,10 +143,13 @@ function App() {
   ];
 
   const table = useReactTable({
-    data: guitars,
+    data: filteredGuitars,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+
+    autoResetPageIndex: false,
+
     initialState: {
       pagination: {
         pageSize: 5,
@@ -360,10 +377,18 @@ function App() {
           </form>
         </div>
 
-        {/* Inventory Table */}
         <div className={styles.card}>
           <h2 className={styles.tableTitle}>
             Available Inventory
+            <div className={styles.filterContainer}>
+              <button
+                type="button"
+                onClick={() => setShowMerchantOnly(!showMerchantOnly)}
+                className={styles.filterButton}
+              >
+                {showMerchantOnly ? "Show All" : "Show Merchant Only"}
+              </button>
+            </div>
           </h2>
 
           {guitars.length === 0 ? (
@@ -391,7 +416,15 @@ function App() {
 
                   <tbody>
                     {table.getRowModel().rows.map((row) => (
-                      <tr key={row.id}>
+                      <tr
+                        key={row.id}
+                        onClick={() => setSelectedGuitar(row.original)}
+                        className={
+                          activeGuitar && activeGuitar.id === row.original.id
+                            ? styles.selectedRow
+                            : ""
+                        }
+                      >
                         {row.getVisibleCells().map((cell) => (
                           <td key={cell.id}>
                             {flexRender(
@@ -432,8 +465,94 @@ function App() {
               </div>
             </>
           )}
-        </div>
 
+        </div>
+        {activeGuitar && (
+          <div className={styles.card}>
+            <h2 className={styles.tableTitle}>
+              Active Guitar Details
+            </h2>
+
+            <div className={styles.detailsGrid}>
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>
+                  Guitar Model
+                </span>
+
+                <span className={styles.detailValue}>
+                  {activeGuitar.itemName}
+                </span>
+              </div>
+
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>
+                  Body Type
+                </span>
+
+                <span className={styles.detailValue}>
+                  {activeGuitar.bodyType}
+                </span>
+              </div>
+
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>
+                  Genre
+                </span>
+
+                <span className={styles.detailValue}>
+                  {activeGuitar.genre}
+                </span>
+              </div>
+
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>
+                  Brand / Artist
+                </span>
+
+                <span className={styles.detailValue}>
+                  {activeGuitar.brand}
+                </span>
+              </div>
+
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>
+                  Stock Quantity
+                </span>
+
+                <span className={styles.detailValue}>
+                  {activeGuitar.stock}
+                </span>
+              </div>
+
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>
+                  Manufacturer
+                </span>
+
+                <span className={styles.detailValue}>
+                  {activeGuitar.company}
+                </span>
+              </div>
+
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>
+                  User Role
+                </span>
+
+                <span
+                  className={
+                    activeGuitar.role === "Merchant"
+                      ? styles.merchantBadge
+                      : styles.consumerBadge
+                  }
+                >
+                  {activeGuitar.role}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+        
       </div>
     </div>
   );
