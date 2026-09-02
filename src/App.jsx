@@ -90,11 +90,16 @@ function App() {
         id: Date.now(),
       };
 
-      setGuitars([...guitars, newGuitar]);
+      setGuitars((currentGuitars) => [
+        ...currentGuitars,
+        newGuitar,
+      ]);
 
       alert("Guitar successfully registered!");
 
       console.log("Submitted Guitar:", newGuitar);
+
+      handleClear();
     }
   };
 
@@ -486,7 +491,7 @@ function App() {
 
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>
-                  Body Type
+                  Guitar Type
                 </span>
 
                 <span className={styles.detailValue}>
@@ -501,16 +506,6 @@ function App() {
 
                 <span className={styles.detailValue}>
                   {activeGuitar.genre}
-                </span>
-              </div>
-
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>
-                  Brand / Artist
-                </span>
-
-                <span className={styles.detailValue}>
-                  {activeGuitar.brand}
                 </span>
               </div>
 
@@ -552,7 +547,7 @@ function App() {
             </div>
           </div>
         )}
-        
+
       </div>
     </div>
   );
