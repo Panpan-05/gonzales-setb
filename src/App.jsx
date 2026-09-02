@@ -1,4 +1,10 @@
 import { useState } from "react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import styles from "./App.module.css";
 
 function App() {
@@ -6,13 +12,13 @@ function App() {
     itemName: "",
     bodyType: "",
     genre: "",
-    brand: "",
     stock: "",
     company: "",
     role: "",
   });
 
   const [errors, setErrors] = useState({});
+  const [guitars, setGuitars] = useState([]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -39,10 +45,6 @@ function App() {
 
     if (formData.genre.trim() === "") {
       newErrors.genre = "Genre is required.";
-    }
-
-    if (formData.brand.trim() === "") {
-      newErrors.brand = "Brand or artist is required.";
     }
 
     if (formData.stock === "") {
@@ -73,9 +75,16 @@ function App() {
     event.preventDefault();
 
     if (validateForm()) {
+      const newGuitar = {
+        ...formData,
+        id: Date.now(),
+      };
+
+      setGuitars([...guitars, newGuitar]);
+
       alert("Guitar successfully registered!");
 
-      console.log("Submitted Guitar:", formData);
+      console.log("Submitted Guitar:", newGuitar);
     }
   };
 
@@ -84,7 +93,6 @@ function App() {
       itemName: "",
       bodyType: "",
       genre: "",
-      brand: "",
       stock: "",
       company: "",
       role: "",
@@ -93,23 +101,63 @@ function App() {
     setErrors({});
   };
 
+  const columns = [
+    {
+      accessorKey: "itemName",
+      header: "Guitar Name",
+    },
+    {
+      accessorKey: "bodyType",
+      header: "Guitar Type",
+    },
+    {
+      accessorKey: "genre",
+      header: "Genre",
+    },
+    {
+      accessorKey: "stock",
+      header: "Stock",
+    },
+    {
+      accessorKey: "company",
+      header: "Manufacturer",
+    },
+    {
+      accessorKey: "role",
+      header: "User Role",
+    },
+  ];
+
+  const table = useReactTable({
+    data: guitars,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 5,
+      },
+    },
+  });
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>
+
         <div className={styles.card}>
           <h1 className={styles.title}>
-            Guitar Store Inventory Manager
+            Guitar Inventory Management
           </h1>
 
           <p className={styles.subtitle}>
-            Register a guitar item into the inventory
+            Register an item into the inventory
           </p>
 
           <form onSubmit={handleSubmit}>
-            {/* Guitar Model */}
+
             <div className={styles.formGroup}>
               <label htmlFor="itemName">
-                Guitar Model / Item Name
+                Guitar Name
               </label>
 
               <input
@@ -133,10 +181,9 @@ function App() {
               )}
             </div>
 
-            {/* Body Type */}
             <div className={styles.formGroup}>
               <label htmlFor="bodyType">
-                Body Type
+                Guitar Type
               </label>
 
               <select
@@ -151,7 +198,7 @@ function App() {
                 }
               >
                 <option value="">
-                  Select body type
+                  Select guitar type
                 </option>
 
                 <option value="Electric">
@@ -178,10 +225,9 @@ function App() {
               )}
             </div>
 
-            {/* Genre */}
             <div className={styles.formGroup}>
               <label htmlFor="genre">
-                Sub-category / Genre
+                Genre
               </label>
 
               <input
@@ -205,34 +251,6 @@ function App() {
               )}
             </div>
 
-            {/* Brand */}
-            <div className={styles.formGroup}>
-              <label htmlFor="brand">
-                Brand / Artist
-              </label>
-
-              <input
-                id="brand"
-                type="text"
-                name="brand"
-                value={formData.brand}
-                onChange={handleChange}
-                placeholder="e.g. Fender"
-                className={
-                  errors.brand
-                    ? styles.inputError
-                    : styles.input
-                }
-              />
-
-              {errors.brand && (
-                <span className={styles.error}>
-                  {errors.brand}
-                </span>
-              )}
-            </div>
-
-            {/* Stock */}
             <div className={styles.formGroup}>
               <label htmlFor="stock">
                 Stock Quantity
@@ -261,7 +279,6 @@ function App() {
               )}
             </div>
 
-            {/* Manufacturer */}
             <div className={styles.formGroup}>
               <label htmlFor="company">
                 Manufacturer / Company Name
@@ -288,7 +305,6 @@ function App() {
               )}
             </div>
 
-            {/* User Role */}
             <div className={styles.formGroup}>
               <label>User Role</label>
 
@@ -325,7 +341,6 @@ function App() {
               )}
             </div>
 
-            {/* Buttons */}
             <div className={styles.buttonGroup}>
               <button
                 type="submit"
@@ -344,6 +359,81 @@ function App() {
             </div>
           </form>
         </div>
+
+        {/* Inventory Table */}
+        <div className={styles.card}>
+          <h2 className={styles.tableTitle}>
+            Available Inventory
+          </h2>
+
+          {guitars.length === 0 ? (
+            <p className={styles.emptyMessage}>
+              No items registered yet.
+            </p>
+          ) : (
+            <>
+              <div className={styles.tableWrapper}>
+                <table className={styles.table}>
+                  <thead>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <tr key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => (
+                          <th key={header.id}>
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                          </th>
+                        ))}
+                      </tr>
+                    ))}
+                  </thead>
+
+                  <tbody>
+                    {table.getRowModel().rows.map((row) => (
+                      <tr key={row.id}>
+                        {row.getVisibleCells().map((cell) => (
+                          <td key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className={styles.pagination}>
+                <button
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                  className={styles.pageButton}
+                >
+                  Previous
+                </button>
+
+                <span className={styles.pageInfo}>
+                  Page{" "}
+                  {table.getState().pagination.pageIndex + 1}{" "}
+                  of {table.getPageCount()}
+                </span>
+
+                <button
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                  className={styles.pageButton}
+                >
+                  Next
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
       </div>
     </div>
   );
